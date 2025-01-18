@@ -25,6 +25,16 @@ const questionSchema = new mongoose.Schema({
   category: String,
 });
 
+//update 1: start
+// const questionSchema = new mongoose.Schema({
+//   question: String,
+//   options: [String],
+//   answer: String,
+//   category: String,
+//   subtopic: String, // New field for subtopics
+// });
+//update 1 : end
+
 const User=mongoose.model('User', userSchema)
 const Question = mongoose.model('Question', questionSchema);
 
@@ -45,11 +55,24 @@ app.get('/questions', async (req, res) => {
   res.json(questions);
 });
 
+// update 4 : start
 app.get('/questions/:category', async (req, res) => {
   const { category } = req.params;
   const questions = await Question.find({ category });
   res.json(questions);
 });
+
+// app.get('/questions/:category', async (req, res) => {
+//   const { category } = req.params;
+//   const { subtopic } = req.query; // Get optional subtopic from query
+
+//   const filter = { category };
+//   if (subtopic) filter.subtopic = subtopic; // Add subtopic to filter if provided
+
+//   const questions = await Question.find(filter);
+//   res.json(questions);
+// });
+//update 4 : end
 
 // Register
 app.post('/register', async (req, res) => {
@@ -79,7 +102,7 @@ app.post('/login', async (req, res) => {
     res.status(500).send('Error logging in');
   }
 });
-
+ 
 // Middleware to authenticate user
 const authenticate = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
@@ -123,6 +146,70 @@ app.get('/progress', authenticate, async (req, res) => {
   res.json(progress);
 });
 
+//update 2 : start
+// app.get('/subtopics/:category', async (req, res) => {
+//   const { category } = req.params;
+//   const subtopics = await Question.distinct('subtopic', { category });
+//   res.json(subtopics);
+// });
+//update 2 : end
+
+//update 6 : start
+// app.get('/subtopics/:category', async (req, res) => {
+//   const { category } = req.params;
+//   const subtopics = await Question.distinct('subtopic', { category }); // Adjust according to your schema
+//   res.json(subtopics);
+// });
+//update 6 : end
+
+
+
+//hmm
+
+app.get('/weekly-quiz', async (req, res) => {
+  const categories = await Question.distinct('category');
+  const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+  const questions = await Question.find({ category: randomCategory });
+
+  // Select a random question or set of questions for the challenge
+  const randomQuestions = questions.sort(() => 0.5 - Math.random()).slice(0, 5); // Adjust the number as needed
+
+  res.json({
+    category: randomCategory,
+    questions: randomQuestions,
+  });
+});
+
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
